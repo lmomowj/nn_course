@@ -26,7 +26,7 @@ kaiti_font_title = font_manager.FontProperties(family="KaiTi", size=16)
 kaiti_font_legend = font_manager.FontProperties(family="KaiTi", size=11)
 
 import seaborn as sns
-palette = sns.color_palette("hls", 16)
+palette = sns.color_palette("hls", 24)
 sns.set_palette(palette) 
 sns.set_style("whitegrid")
 # sns.set(style='ticks',palette='pastel')
@@ -37,6 +37,8 @@ linestyle_str = [
      ('dotted', 'dotted'),    # 同 (0, (1, 1)) or '.'
      ('dashed', 'dashed'),    # 同 as '--'
      ('dashdot', 'dashdot')]  # 同  '-.'
+
+markers = ["o", "*", "v","p","s","X","P","^","d","<","h",">","8","H","D"]
 
 
 
@@ -210,8 +212,7 @@ def draw_classification_region(data,c_data,**kwargs):
     return
 
 # 绘制二分类问题的分类边界
-def draw_decision_boundary(num,dataset,w,func=None,**kwargs):   
-    
+def draw_decision_boundary(num,dataset,W,func=None,**kwargs): 
     X,Y = dataset
     if func is None:
         func = 'linear'        
@@ -225,34 +226,35 @@ def draw_decision_boundary(num,dataset,w,func=None,**kwargs):
         plt.ylabel(r'$x_2$')
         # cnum = random.randint(1,len(palette))-1 
         if (func == 'linear'):
-            w2 = w[2]
-            if w2 == 0:
-                w2 += 10**-10        
-            k = round(-w[1]/w2,2)
-            b = round(w[0]/w2,2)
-            afunc = eval(f'act.{act.func_name[func]}({k},{b})') 
-            label=r'$W=[{},{}],T={}$'.format(round(w[1],2),round(w[2],2),round(w[0],2))
-            title = kwargs.get('title','')
-            plt.title(title,fontsize=14,fontproperties=kaiti_font_title)
-            # 绘训练样本散点图
-            for i,y in enumerate(Y):
-                x = X[i]
-                if y <= 0:
-                    plt.scatter(x[0], x[1], marker='o',color=palette[5],s=40)
-                else:
-                    plt.scatter(x[0], x[1], marker='*',color=palette[10],s=60)
+            for i,w in enumerate(W):   
+                color_i = palette[((i+1)*7) % len(palette)]
+                w2 = w[2]
+                if w2 == 0:
+                    w2 += 10**-10        
+                k = round(-w[1]/w2,2)
+                b = round(w[0]/w2,2)
+                afunc = eval(f'act.{act.func_name[func]}({k},{b})') 
+                label=r'$W=[{},{}],T={}$'.format(round(w[1],2),round(w[2],2),round(w[0],2))
+                title = kwargs.get('title','')
+                plt.title(title,fontsize=14,fontproperties=kaiti_font_title)
+                # 绘训练样本散点图
+                for x,y in zip(X,Y):
+                    marker = markers[y % len(markers)]
+                    color = palette[y*3 % len(palette)]
+                    plt.scatter(x[0], x[1], marker=marker,color=color,s=50)
+
+                # 绘 判别边界线
+                fvalue = [afunc(i) for i in num]
+                plt.plot(
+                    num,
+                    fvalue,
+                    linewidth=linewidth,
+                    color=color_i,
+                    linestyle = linestyle,
+                    label= label
+                    )            
+                plt.legend()
             
-            # 绘 判别边界线
-            fvalue = [afunc(i) for i in num]
-            plt.plot(
-                num,
-                fvalue,
-                linewidth=linewidth,
-                color=palette[0],
-                linestyle = linestyle,
-                label= label
-                )
-            plt.legend()
             plt.ylim([-3,3])    
         # plt.legend(lg_label)
         # plt.tight_layout()
@@ -270,6 +272,26 @@ def draw_decision_boundary(num,dataset,w,func=None,**kwargs):
     except TypeError:
          print('input function expression is wrong or the funciton is not configured')
 
+def draw_scatter_2c(data,**kwargs):
+    # 绘 2-类 2-维样本散点图
+    X,Y = data   
+    center = kwargs.get('center',0)  # 是否画出样本重心
+    if center:
+        X_0 = np.mean(X[Y<=0],axis=0)  # 第1类重心
+        X_1 = np.mean(X[Y>0],axis=0)  # 第2类重心        
+    dpi = kwargs.get('dpi',100)       # 图片分辨率 默认300
+    figsize = kwargs.get('figsize',(6,4))
+    fig = plt.figure(figsize=figsize,dpi=dpi) 
+    for x,y in zip(X,Y):
+        if y <= 0:
+            plt.scatter(x[0], x[1], marker='o',color=palette[5],s=40)
+        else:
+            plt.scatter(x[0], x[1], marker='*',color=palette[10],s=60)
+    if center:
+        plt.scatter(X_0[0], X_0[1], marker= '^',color=palette[5],s=70)
+        plt.scatter(X_1[0], X_1[1], marker= '^',color=palette[10],s=70)        
+    plt.show() 
+    
 
 # 绘制分类性能随参数变化图(训练误差-测试误差-验证误差)
 def draw_scores(fig_dir,fig_name,**kwargs):

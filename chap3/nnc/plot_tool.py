@@ -90,7 +90,11 @@ def draw_classification_data(fig_dir,fig_name,data,**kwargs):
     # 设置标记
     # markers = list(map(lambda x: map_marker[x], label.tolist()))
     
-    plt.rcParams['figure.figsize'] = (6.0,5.0)
+    dpi = kwargs.get('dpi',100)       # 图片分辨率 默认300
+    figsize = kwargs.get('figsize',(6,5))    
+    plt.rcParams['figure.figsize'] = figsize
+    plt.rcParams['figure.dpi'] = dpi
+    
     plt.scatter(x=X[:, 0].tolist(), y=X[:, 1].tolist(), marker='*', color=colors)
     
     # idx_0 = np.where(label==0)[0].tolist()

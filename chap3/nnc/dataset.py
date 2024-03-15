@@ -165,16 +165,16 @@ class sin_data():
         if reg_lambda != 0:
             label_pred_reg = r"$M={},\ell_2\ reg\ (\lambda={})$".format(degree,reg_lambda)
         
-        
         if (X_train,y_train) == (None,None) and (X_test,y_test) == (None,None) and (X_underlying,y_underlying) == (None,None):
             return 
-
-        plt.rcParams['figure.figsize'] = (8.0,6.0)
+        
+        plt.rcParams['figure.figsize'] = (7.0,5.0)
+        plt.rcParams['figure.dpi'] = 100
         if X_train is not None and y_train is not None:
             plt.scatter(X_train, y_train, marker='*', facecolor="none", edgecolor='#e4007f', s=50, label="training data")
 
         if X_test is not None and y_test is not None:
-            plt.scatter(X_test, y_test, facecolor="none", edgecolor='#f19ec2', s=50, label="testing data")
+            plt.scatter(X_test, y_test, facecolor="none", edgecolor= '#f19ec2', s=50, label="testing data")   # '#00a497'
 
         if X_underlying is not None and y_underlying is not None:        
             plt.plot(X_underlying, y_underlying, c='b', label=r"$\sin(2\pi x)$")
@@ -187,7 +187,7 @@ class sin_data():
         if X_underlying is not None and y_underlying_pred_reg is not None:        
             plt.plot(X_underlying, y_underlying_pred_reg, c='#f19ec2', linestyle="-.", label=label_pred_reg)  #label="predicted function")
         plt.ylim(-1.5,1.5)
-        plt.legend(fontsize='x-large') # 给图像加图例        
+        plt.legend(fontsize='medium') # 给图像加图例        
         # 保存图片
         plt.savefig(fig_path) # 保存图像到PDF文件中
         plt.show()

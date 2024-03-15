@@ -338,7 +338,7 @@ def draw_scores(fig_dir,fig_name,**kwargs):
         
     cmap = sns.color_palette("Paired",20)
     dpi = kwargs.get('dpi',100)
-    figsize = kwargs.get('figsize',(6,4))
+    figsize = kwargs.get('figsize',(7,5))
     plt.rcParams['figure.figsize'] = figsize  #  (8.0, 6.0)
     plt.rcParams['figure.dpi'] = dpi  
     
@@ -356,7 +356,7 @@ def draw_scores(fig_dir,fig_name,**kwargs):
         # plt.xlim(xlim[0],xlim[1])
     if ylim is not None:
         plt.ylim(ylim[0],ylim[1])  
-    plt.legend(fontsize='x-large')    
+    plt.legend(fontsize='medium')    
         
     # 保存图片
     plt.savefig(fig_path) # 保存图像到PDF文件中

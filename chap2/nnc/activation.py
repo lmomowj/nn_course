@@ -445,7 +445,7 @@ linestyle_str = [
      ('dashed', 'dashed'),    # 同 as '--'
      ('dashdot', 'dashdot')]  # 同  '-.'   
 
-func_name = {'unit':['Unit','Unit','单位阶跃函数'],
+func_name_p = {'unit':['Unit','Unit','单位阶跃函数'],
          'sgn':['Sgn','Sgn','符号函数'],
          'relu':['ReLU','Rectified Linear Unit','修正线性单元'],
          'leakyRelu':['LeakyReLU','Leaky ReLU','带泄露的ReLU'],
@@ -478,13 +478,14 @@ def draw_func(num=None,func=None,**kwargs):
     if func is None:
         func = input( 'Input function expression what you want draw: \n(unit,sgn,logistic,tanh,sigmoid,sigmoid_d,relu,leakyRelu,elu,softplus,swish,piecewise_s,piecewise_d,hard_logistic,hard_tanh,gelu )\n' )
     
-    dpi = kwargs.get('dpi',300)       # 图片分辨率 默认300
+    dpi = kwargs.get('dpi',100)       # 图片分辨率 默认300
+    figsize = kwargs.get('figsize,',(6,4))
     color = kwargs.get('color',palette[random.randint(1,len(palette))-1])   # 默认随机生成
     linestyle = kwargs.get('linestyle','solid')                    # 默认“solid"
     linewidth = kwargs.get('linewidth',2)                        # 默认 2
     
     # plot 标题
-    title_en = '{} Activation Function'.format(func_name[func][0])
+    title_en = '{} Activation Function'.format(func_name_p[func][0])
     title_zh = func_name[func][2]
     title_text = title_en     # 标题 默认为英文
     
@@ -495,14 +496,14 @@ def draw_func(num=None,func=None,**kwargs):
     else:
         grad_order = kwargs.get('grad_order',1)
                      
-    fig = plt.figure(dpi=dpi)
+    fig = plt.figure(figsize=figsize,dpi=dpi)
     try:
         plt.xlabel(r'$z$')  #  ('x label')
         plt.ylabel(r'$f(z)$')        
         if (func in ['piecewise_s','piecewise_d']):
-            plt.title(func_name[func][0],fontsize=16,fontproperties=kaiti_font_title)
+            plt.title(func_name_p[func][0],fontsize=16,fontproperties=kaiti_font_title)
             a = input('参数 a = ')
-            afunc = eval(f'act.{act.func_name[func]}({a})')   
+            afunc = eval(f'{func_name[func]}({a})')   
             if (func == 'piecewise_s'):                
                 a_c = round(1/float(a),2)
             elif (func == 'piecewise_d'):  
@@ -532,7 +533,7 @@ def draw_func(num=None,func=None,**kwargs):
             #if func == 'elu': color = palette[5]       # green
             plt.title(title_en,fontsize=16)
             a = input('参数 a = ')
-            afunc = eval(f'act.{act.func_name[func]}()({a})')
+            afunc = eval(f'{func_name[func]}()({a})')
             label=f'$\\alpha={a}$'
             if draw_grad is None:
                 plt.plot(
@@ -556,7 +557,7 @@ def draw_func(num=None,func=None,**kwargs):
         elif (func in ['swish']):
             plt.title(title_en,fontsize=16)
             b = input('参数 b = ')
-            afunc = eval(f'act.{act.func_name[func]}({b})')
+            afunc = eval(f'{func_name[func]}({b})')
             label=f'$\\beta={b}$'
             if draw_grad is None:
                 plt.plot(
@@ -581,7 +582,7 @@ def draw_func(num=None,func=None,**kwargs):
             # 输入参数
             mu = input('mu = ')
             sigma = input('sigma = ')
-            afunc = eval(f'act.{act.func_name[func]}({mu},{sigma})')
+            afunc = eval(f'{func_name[func]}({mu},{sigma})')
             label=f'$\\mu={mu},\\sigma={sigma}$'
             if func in ['normal_pdf','normal_cdf']:
                 plt.title(title_zh,fontsize=16,fontproperties=kaiti_font_title)
@@ -613,14 +614,13 @@ def draw_func(num=None,func=None,**kwargs):
             w = [float(wi.strip()) for wi in w.strip('[] ').split(',')]
             b = float(b)
             if func == 'linear_2d':
-                afunc = eval(f'act.{act.func_name[func]}({w},{b})')
+                afunc = eval(f'{func_name[func]}({w},{b})')
             if func == 'linear':
                 k = -w[0]/w[1]
                 b_0 = -b/w[1]
-                afunc = eval(f'act.{act.func_name[func]}({k},{b_0})')
+                afunc = eval(f'{func_name[func]}({k},{b_0})')
             label=f'$w={w},b={b}$'
             plt.title('Linear Function',fontsize=16) 
-            
             if draw_grad is None:
                 if func == 'linear_2d':
                     fvalue = [afunc.value(i) for i in num]
@@ -651,9 +651,9 @@ def draw_func(num=None,func=None,**kwargs):
         else:
             #if func == 'relu': color = palette[5]     # green  
             #if func == 'logistic': color = palette[10]  # blue 
-            afunc = eval(f'act.{act.func_name[func]}()')
+            afunc = eval(f'{func_name[func]}()')
             if (func in ['sigmoid','sigmoid_d']):
-                plt.title(func_name[func][0],fontsize=16,fontproperties=kaiti_font_title)
+                plt.title(func_name_p[func][0],fontsize=16,fontproperties=kaiti_font_title)
             else:
                 plt.title(title_en,fontsize=16)  
             if draw_grad is None:

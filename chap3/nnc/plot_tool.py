@@ -8,7 +8,7 @@ Created on Sat Feb 3 09:45:54 2024
 """
 
 import os
-import torch
+#import torch
 #%matplotlib inline
 import matplotlib
 from matplotlib import rcParams,font_manager
@@ -148,7 +148,9 @@ def draw_classification_data_DB(fig_dir,fig_name,data,DB_data,**kwargs):
     # 绘制 决策边界    
     DB_x,DB_y = DB_data
     
-    if torch.is_tensor(DB_y):
+    #if torch.is_tensor(DB_y):
+         #DB_y = [DB_y]
+    if isinstance(DB_y,np.ndarray):
         DB_y = [DB_y]
     
     for i in range(len(DB_y)):

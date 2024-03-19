@@ -486,7 +486,7 @@ def draw_func(num=None,func=None,**kwargs):
     
     # plot 标题
     title_en = '{} Activation Function'.format(func_name_p[func][0])
-    title_zh = func_name[func][2]
+    title_zh = func_name_p[func][2]
     title_text = title_en     # 标题 默认为英文
     
     # 是否绘制导函数图像

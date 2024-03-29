@@ -423,7 +423,7 @@ def draw_circ(dataset,**kwargs):
     y = r*np.sin(theta)
     
     title = kwargs.get('title','')
-    plt.rcParams['figure.figsize'] = (4.0,4.0)
+    plt.rcParams['figure.figsize'] = (4,4.0)
     plt.rcParams['figure.dpi'] = 100
     plt.title(title,fontsize=16,fontproperties=kaiti_font_title)
     
@@ -459,125 +459,149 @@ def draw_circ(dataset,**kwargs):
             scatter_s=200
             scatter_alpha=0.9
         points_x,points_y = data[:,0],data[:,1]
-        # 绘制各角度散点，以及坐标原点到点的箭头连线
-        i = 0
-        for xi,yi in zip(points_x,points_y):
+        # 绘制各角度散点，以及坐标原点到点的箭头连线        
+        for i,(xi,yi) in enumerate(zip(points_x,points_y)):            
             plt.annotate('',xy=(xi,yi),xytext=(0,0),arrowprops=arrowprops)
             plt.scatter(xi,yi, color=scatter_color, marker=scatter_marker, s=scatter_s, alpha=scatter_alpha)
-            plt.annotate(slabel.format(i+1), (xi,yi))  
-            i += 1
-    
-    # 当前的样本点
-    sid = kwargs.get('index',None)
-    if sid is not None:
-        X = dataset[0][sid,:]
-        x1,y1 = X[0],X[1]
-        for xi,yi in zip(points_x,points_y):  # 权值向量坐标
-            arrowprops = dict(arrowstyle="-",
-                          color= 'yellowgreen',    # 'cornflowerblue',
-                          lw=2,
-                          ls='-')
-            plt.annotate('',xy=(xi,yi),xytext=(x1,y1),arrowprops=arrowprops)
+            plt.annotate(slabel.format(i+1), (xi,yi))             
 
     # 设置坐标轴等比例以确保圆形
     plt.axis('equal')
     # 显示图像
     plt.show()
 
-
-class draw_som():
+def draw_cl(dataset,**kwargs):  
+    # 绘制归一化（长度为1）的数据在单位圆上的分布
+    # 圆半径  # 默认单位圆
+    r = 1  #
+    # 生成（单位）圆的参数
+    theta = np.linspace(0, 2 * np.pi, 1000)
+    x = r*np.cos(theta)
+    y = r*np.sin(theta)
     
-    def gen_coords_topk(self,arr,k,ctype='min'):
-        # 获取数组中前k个最小/大值的索引
-        if ctype == 'min':
-            idx = np.argpartition(arr.ravel(), k)[:k]
-            idx = idx[np.argsort(arr.ravel()[idx])]
-        else:
-            idx = np.argpartition(-arr.ravel(), k)[:k]
-            idx = idx[np.argsort(-arr.ravel()[idx])]
-        row_indices, col_indices = np.unravel_index(idx, arr.shape)
-        # 根据索引获取前k个最小/大值
-        values = arr[row_indices, col_indices]
-        indices = np.array([row_indices,col_indices]).T
-        return indices,values
-
-    def cal_maps(self,som,X,som_shape):
-        # 计算数据在竞争层上的特征映射
-        n_sample,n_feature = X.shape
-        acts = np.zeros((som_shape[0],som_shape[1],n_sample))
-        winner_maps = np.zeros((som_shape[0],som_shape[1])) - 1
-        winner = []
-        for i in range(n_sample):
-            act_i = som.activate(X[i])  # 第i个样本 在竞争层上的激活值
-            acts[:,:,i] = act_i
-            if winner_maps[som.winner(X[i])] == -1:
-                winner_maps[som.winner(X[i])] = i 
-                winner.append(som.winner(X[i]))  # winner 位置坐标
+    title = kwargs.get('title','')
+    plt.rcParams['figure.figsize'] = (4.5,4.0)
+    plt.rcParams['figure.dpi'] = 100
+    plt.title(title,fontsize=16,fontproperties=kaiti_font_title)
+    
+    # 绘制坐标原点(0,0)
+    plt.scatter(0,0,color='midnightblue',marker='o', s=14)
+    # 绘制单位圆
+    plt.plot(x, y, color='midnightblue',linestyle='dotted')
+    
+    winner = kwargs.get('winner',None)
+    
+    # samples,weights = dataset   # 样本、权值矩阵
+    for num in range(len(dataset)):    #
+        data = dataset[num]
+        if num == 0:   # 绘制样本
+            # 箭头参数设置
+            slabel = '$X_{}$'
+            arrowprops = dict(arrowstyle="->",
+                      color='violet',
+                      lw=2,
+                      ls='-')
+            scatter_color = 'royalblue'
+            scatter_marker= 'o'
+            scatter_s=160
+            scatter_alpha=0.6
+        elif num == 1:  # 绘制权值向量
+            #winner = kwargs.get('winner','')
+            # 箭头参数设置
+            slabel = '$W_{}$'
+            arrowprops = dict(arrowstyle="->",
+                      color='gold',
+                      lw=2,
+                      ls='-')
+            arrowprops_w = dict(arrowstyle="->",
+                      color='deepskyblue',
+                      lw=2,
+                      ls='-')
+            scatter_color = 'orange'
+            scatter_marker= '*'
+            scatter_s=200
+            scatter_alpha=0.9
+        points_x,points_y = data[:,0],data[:,1]
+        # 绘制各角度散点，以及坐标原点到点的箭头连线        
+        for i,(xi,yi) in enumerate(zip(points_x,points_y)):            
+            if (num == 1) and (winner is not None):
+                if i == winner[0]:   
+                    # 获胜节点未更新的权值
+                    xi_old,yi_old = winner[1][0],winner[1][1]
+                    plt.annotate('',xy=(xi_old,yi_old),xytext=(0,0),arrowprops=arrowprops)
+                    plt.scatter(xi_old,yi_old, color=scatter_color, marker=scatter_marker, s=scatter_s, alpha=scatter_alpha)
+                    plt.annotate(slabel.format(str(i+1)+'(winner)'), (xi_old,yi_old))
+                    # 获胜节点更新后的权值
+                    plt.annotate('',xy=(xi,yi),xytext=(0,0),arrowprops=arrowprops)
+                    plt.scatter(xi,yi, color='orangered', marker=scatter_marker, s=scatter_s, alpha=scatter_alpha)
+                    plt.annotate(slabel.format(i+1), (xi,yi))
+                    # 加入从旧权值 到 新权值的箭头连续
+                    plt.annotate('',xy=(xi,yi),xytext=(xi_old,yi_old),arrowprops=arrowprops_w)                    
+                else:
+                    plt.annotate('',xy=(xi,yi),xytext=(0,0),arrowprops=arrowprops)
+                    plt.scatter(xi,yi, color=scatter_color, marker=scatter_marker, s=scatter_s, alpha=scatter_alpha)
+                    plt.annotate(slabel.format(i+1), (xi,yi))                   
             else:
-                # 次获胜神经元的位置
-                topk = int(np.ceil(som_shape[0]*0.25))*int(np.ceil(som_shape[1]*0.25))+1
-                winner_topk,winner_vals = gen_coords_topk(act_i,topk)
-                flag = 0
-                for k in range(1,topk):
-                    coord = winner_topk[k]
-                    if winner_maps[coord[0],coord[1]] == -1:
-                        winner_maps[coord[0],coord[1]] = i
-                        winner.append(tuple(coord))  # winner 位置坐标  # 次
-                        flag = 1
-                        break
-            #winner.append(som.winner(X[i]))  # winner 位置坐标
-        winner = np.array(winner)
-        return np.argmin(acts,axis=-1),np.ravel_multi_index(winner.T,som_shape),winner_maps
+                plt.annotate('',xy=(xi,yi),xytext=(0,0),arrowprops=arrowprops)
+                plt.scatter(xi,yi, color=scatter_color, marker=scatter_marker, s=scatter_s, alpha=scatter_alpha)
+                plt.annotate(slabel.format(i+1), (xi,yi))            
 
-    def draw_som_maps(self,maps,winner=None,text_type=None,**kwargs):
-        # 标签字体设置
-        SimHei_font = font_manager.FontProperties(family="SimHei", size=12)
-        classnum = kwargs.get('classnum',2)
-        classname = {}
-        for i in range(classnum):
-            classname[i] = ('','')
-        names = kwargs.get('classname',classname)
+    # 设置坐标轴等比例以确保圆形
+    plt.axis('equal')
+    # 显示图像
+    plt.show()
+    
 
-        M1,M2 = maps.shape
-        y = np.linspace(M1,1,M1)
-        x = np.linspace(1,M2,M2)
-        # 创建一个二维网格
-        X, Y = np.meshgrid(x, y)
+def draw_som_maps(maps,winner=None,text_type=None,**kwargs):
+    # 标签字体设置
+    SimHei_font = font_manager.FontProperties(family="SimHei", size=12)
 
-        # 按类别数目设置颜色
-        colors = [(245/255, 240/255, 245/255)]
-        colors.extend(sns.color_palette("hls",classnum))
-        cmap = ListedColormap(colors)
-        bounds = list(range(-1,classnum+1,1))
-        norm = BoundaryNorm(bounds, cmap.N)
+    classnum = kwargs.get('classnum',2)
+    classname = {}
+    for i in range(classnum):
+        classname[i] = ('','')
+    names = kwargs.get('classname',classname)
 
-        # 绘制网格分布图
-        plt.pcolormesh(X, Y, maps, cmap=cmap, norm=norm)   # 'viridis')
-        # 添加颜色刻度条
-        plt.colorbar()
-        # 对聚类结果加标签
-        for i in range(M1):
-            for j in range(M2):
-                #plt.text(X[i,j],Y[M1-i-1,M2-j-1],f'${maps[i,j]}$',fontsize=12,color='w')
-                if int(maps[i,j])>=0:
-                    if text_type is None:
-                        plt.text(X[i,j],Y[i,j],f'${int(maps[i,j])}$',fontsize=12,color='w',ha='center',va='center')
-                    else:
-                        if text_type in ['number']:
-                            text = f'${int(maps[i,j])}$'
-                        elif text_type in ['en']:
-                            text = names[int(maps[i,j])][0]
-                        elif text_type in ['zh']:
-                            text = names[int(maps[i,j])][1]
-                        map_ij = np.ravel_multi_index([i,j],(M1,M2))
-                        if map_ij in winner:
-                            plt.text(X[i,j],Y[i,j],text,fontsize=12,color='w',ha='center',va='center',fontproperties=SimHei_font)
+    M1,M2 = maps.shape
+    y = np.linspace(M1,1,M1)
+    x = np.linspace(1,M2,M2)
+    # 创建一个二维网格
+    X, Y = np.meshgrid(x, y)
 
-        # 设置坐标轴标签
-        #plt.xlabel('X')
-        #plt.ylabel('Y')
-        # 显示图形
-        plt.show()
+    # 按类别数目设置颜色
+    colors = [(245/255, 240/255, 245/255)]
+    colors.extend(sns.color_palette("hls",classnum))
+    cmap = ListedColormap(colors)
+    bounds = list(range(-1,classnum+1,1))
+    norm = BoundaryNorm(bounds, cmap.N)
+
+    # 绘制网格分布图
+    plt.pcolormesh(X, Y, maps, cmap=cmap, norm=norm)   # 'viridis')
+    # 添加颜色刻度条
+    plt.colorbar()
+    # 对聚类结果加标签
+    for i in range(M1):
+        for j in range(M2):
+            #plt.text(X[i,j],Y[M1-i-1,M2-j-1],f'${maps[i,j]}$',fontsize=12,color='w')
+            if int(maps[i,j])>=0:
+                if text_type is None:
+                    plt.text(X[i,j],Y[i,j],f'${int(maps[i,j])}$',fontsize=12,color='w',ha='center',va='center')
+                else:
+                    if text_type in ['number']:
+                        text = f'${int(maps[i,j])}$'
+                    elif text_type in ['en']:
+                        text = names[int(maps[i,j])][0]
+                    elif text_type in ['zh']:
+                        text = names[int(maps[i,j])][1]
+                    map_ij = np.ravel_multi_index([i,j],(M1,M2))
+                    if map_ij in winner:
+                        plt.text(X[i,j],Y[i,j],text,fontsize=12,color='w',ha='center',va='center',fontproperties=SimHei_font)
+
+    # 设置坐标轴标签
+    #plt.xlabel('X')
+    #plt.ylabel('Y')
+    # 显示图形
+    plt.show()
 
 
 # 箱线图查看异常值分布
